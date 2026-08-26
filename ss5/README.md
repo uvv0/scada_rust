@@ -9,7 +9,7 @@ Firmware for industrial RTU/PLC devices running on ARM Cortex-M7. Provides SCADA
 ## Features
 
 - **Modbus TCP/RTU** — slave/server implementation
-- **Lua VM** — embedded Lua 5.4.8 for user scripts running in XIP mode
+- **Lua scripting** — user scripts for automation logic
 - **Web server** — lightweight HTTP server for HMI and configuration
 - **Tag polling** — scheduled data acquisition from connected devices
 - **Archive storage** — ring archives in external SPI flash (W25Q128)
