@@ -1,10 +1,10 @@
 # ss5
 
-Embedded Rust SCADA firmware for STM32H7 microcontrollers.
+Embedded Rust SCADA firmware for microcontrollers.
 
 ## Overview
 
-Firmware for industrial RTU/PLC devices running on ARM Cortex-M7. Provides SCADA data acquisition, Modbus, and web interface on bare metal (no OS).
+Firmware for industrial RTU/PLC devices. Provides SCADA data acquisition, Modbus, and web interface on bare metal (no OS).
 
 ## Features
 
