@@ -1,7 +1,0 @@
-device STM32H750VB
-si SWD
-speed 1000
-connect
-r
-h
-q

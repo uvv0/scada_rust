@@ -1,9 +1,0 @@
-device STM32H750XB
-si SWD
-speed 4000
-connect
-halt
-loadbin D:\picoC\4\Release\Exe\internal_flash.bin 0x08000000
-r
-go
-exit
