@@ -1,6 +1,6 @@
 # im1
 
-Rust implementation of IEC 60870-5-104 / Modbus protocol server for industrial automation.
+SCADA simulator implementing IEC 60870-5-104 / Modbus protocols for industrial automation testing.
 
 ## Features
 
@@ -13,7 +13,7 @@ Rust implementation of IEC 60870-5-104 / Modbus protocol server for industrial a
 
 - RTU simulator for testing SCADA master stations
 - Protocol gateway / converter
-- Data acquisition server for power substations
+- Data acquisition simulator for power substations
 
 ## Architecture
 
