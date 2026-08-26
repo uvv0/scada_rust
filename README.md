@@ -18,5 +18,5 @@ Collection of SCADA (Supervisory Control and Data Acquisition) projects written 
 - **Protocols**: Modbus TCP/RTU, IEC 60870-5-104, MQTT
 - **Databases**: PostgreSQL, SQLite
 - **UI**: egui (desktop), Qt (legacy), embedded web server
-- **Embedded**: IAR toolchain, RTIC framework
+- **Embedded**: STM32H7, IAR toolchain, RTIC framework
 - **Async**: tokio, async-std
