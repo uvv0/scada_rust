@@ -6,7 +6,7 @@ Rust SCADA server application with modular architecture.
 
 - **Modbus TCP/RTU** — poller with configurable intervals, delta writes, alarm rules
 - **Scheduler** — time-based polling plans, script bindings, post-command execution
-- **Script engine** — embedded Lua VM for custom logic and automation
+- **Script engine** — embedded scripting for custom logic and automation
 - **PostgreSQL** — persistent storage for configuration, runtime data, and archives
 - **MQTT** — publish/subscribe integration for external systems
 - **Web UI** — Qt-based operator interface with window composition editor
@@ -17,7 +17,7 @@ Rust SCADA server application with modular architecture.
 - `src/modbus.rs` — Modbus protocol layer
 - `src/poller.rs` — tag polling scheduler
 - `src/scheduler/` — time-based task scheduler, alarm processing, merge logic
-- `src/script.rs` / `src/script_cache.rs` — Lua script execution
+- `src/script.rs` / `src/script_cache.rs` — script execution
 - `src/db.rs` / `src/db_queries.rs` — PostgreSQL access
 - `src/types.rs` — core data structures
 - `src/udp_transport.rs` — UDP transport for RTU over UDP
