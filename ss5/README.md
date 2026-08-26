@@ -12,8 +12,6 @@ Firmware for industrial RTU/PLC devices running on ARM Cortex-M7. Provides SCADA
 - **Lua scripting** — user scripts for automation logic
 - **Web server** — lightweight HTTP server for HMI and configuration
 - **Tag polling** — scheduled data acquisition from connected devices
-- **Archive storage** — ring archives in external SPI flash (W25Q128)
-- **Thread profiler** — runtime execution time monitoring
 
 ## Build
 
