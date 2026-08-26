@@ -1,0 +1,311 @@
+[
+  {
+    "id": "ss4-http-tab",
+    "type": "tab",
+    "label": "ss4 HTTP Dashboard",
+    "disabled": false,
+    "info": "Standalone HTTP dashboard built with Node-RED core nodes."
+  },
+  {
+    "id": "ss4-http-broker",
+    "type": "mqtt-broker",
+    "name": "local mosquitto",
+    "broker": "127.0.0.1",
+    "port": "1883",
+    "clientid": "node-red-ss4-http",
+    "autoConnect": true,
+    "usetls": false,
+    "protocolVersion": "5",
+    "keepalive": "60",
+    "cleansession": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthPayload": "",
+    "closeTopic": "",
+    "closeQos": "0",
+    "closePayload": "",
+    "willTopic": "",
+    "willQos": "0",
+    "willPayload": ""
+  },
+  {
+    "id": "ss4-http-ws",
+    "type": "websocket-listener",
+    "path": "/ss4ws",
+    "wholemsg": "true"
+  },
+  {
+    "id": "http-status-in",
+    "type": "mqtt in",
+    "z": "ss4-http-tab",
+    "name": "status",
+    "topic": "ss4/v1/status",
+    "qos": "1",
+    "datatype": "auto-detect",
+    "broker": "ss4-http-broker",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 80,
+    "wires": [
+      [
+        "http-store-status"
+      ]
+    ]
+  },
+  {
+    "id": "http-store-status",
+    "type": "function",
+    "z": "ss4-http-tab",
+    "name": "store status",
+    "func": "flow.set('status', String(msg.payload || ''));\nflow.set('statusAt', Date.now());\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 340,
+    "y": 80,
+    "wires": [
+      [
+        "http-ws-out"
+      ]
+    ]
+  },
+  {
+    "id": "http-health-in",
+    "type": "mqtt in",
+    "z": "ss4-http-tab",
+    "name": "health",
+    "topic": "ss4/v1/health",
+    "qos": "1",
+    "datatype": "json",
+    "broker": "ss4-http-broker",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 140,
+    "wires": [
+      [
+        "http-store-health"
+      ]
+    ]
+  },
+  {
+    "id": "http-store-health",
+    "type": "function",
+    "z": "ss4-http-tab",
+    "name": "store health",
+    "func": "let p = msg.payload || {};\nif (typeof p === 'string') { try { p = JSON.parse(p); } catch (_) { p = {}; } }\nmsg.payload = p;\nflow.set('health', p);\nflow.set('healthAt', Date.now());\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 340,
+    "y": 140,
+    "wires": [
+      [
+        "http-ws-out"
+      ]
+    ]
+  },
+  {
+    "id": "http-values-in",
+    "type": "mqtt in",
+    "z": "ss4-http-tab",
+    "name": "values",
+    "topic": "ss4/v1/values/+",
+    "qos": "1",
+    "datatype": "json",
+    "broker": "ss4-http-broker",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 220,
+    "wires": [
+      [
+        "http-store-values"
+      ]
+    ]
+  },
+  {
+    "id": "http-store-values",
+    "type": "function",
+    "z": "ss4-http-tab",
+    "name": "store latest values",
+    "func": "let p = msg.payload || {};\nif (typeof p === 'string') { try { p = JSON.parse(p); } catch (_) { p = {}; } }\nmsg.payload = p;\nconst rows = flow.get('latestValues') || {};\nconst values = Array.isArray(p.values) ? p.values : [];\nfor (const v of values) {\n    const key = `${p.kpz_id}/${v.reg_id}`;\n    rows[key] = {\n        ts: p.ts,\n        received_at: Date.now(),\n        kpz_id: p.kpz_id,\n        kpz_name: p.kpz_name || '',\n        group_id: v.group_id,\n        reg_id: v.reg_id,\n        addr: v.addr,\n        name: v.name || '',\n        tip: v.tip,\n        value: v.value,\n        quality: v.quality || ''\n    };\n}\nflow.set('latestValues', rows);\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 360,
+    "y": 220,
+    "wires": [
+      [
+        "http-ws-out"
+      ]
+    ]
+  },
+  {
+    "id": "http-alarms-in",
+    "type": "mqtt in",
+    "z": "ss4-http-tab",
+    "name": "alarms",
+    "topic": "ss4/v1/alarms/+/+",
+    "qos": "1",
+    "datatype": "json",
+    "broker": "ss4-http-broker",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 300,
+    "wires": [
+      [
+        "http-store-alarms"
+      ]
+    ]
+  },
+  {
+    "id": "http-ws-out",
+    "type": "websocket out",
+    "z": "ss4-http-tab",
+    "name": "live websocket",
+    "server": "ss4-http-ws",
+    "client": "",
+    "x": 610,
+    "y": 220,
+    "wires": []
+  },
+  {
+    "id": "http-store-alarms",
+    "type": "function",
+    "z": "ss4-http-tab",
+    "name": "store latest alarms",
+    "func": "let p = msg.payload || {};\nif (typeof p === 'string') { try { p = JSON.parse(p); } catch (_) { p = {}; } }\nmsg.payload = p;\nconst now = Date.now();\nconst key = [p.kpz_id, p.reg_id, p.rule_id].join('/');\nconst rows = flow.get('latestAlarms') || [];\nrows.unshift({\n    received_at: now,\n    kpz_id: p.kpz_id,\n    reg_id: p.reg_id,\n    rule_id: p.rule_id,\n    event: p.event || '',\n    value: p.value,\n    severity: p.severity,\n    code: p.code || '',\n    message: p.message || ''\n});\nflow.set('latestAlarms', rows.slice(0, 200));\nconst states = flow.get('latestAlarmStates') || {};\nconst prev = states[key] || {};\nstates[key] = {\n    ...prev,\n    key,\n    kpz_id: p.kpz_id,\n    reg_id: p.reg_id,\n    rule_id: p.rule_id,\n    event: p.event || '',\n    value: p.value,\n    severity: p.severity,\n    code: p.code || '',\n    message: p.message || '',\n    first_seen: prev.first_seen || now,\n    received_at: now,\n    repeats: (prev.repeats || 0) + 1\n};\nflow.set('latestAlarmStates', states);\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 360,
+    "y": 300,
+    "wires": [
+      [
+        "http-ws-out"
+      ]
+    ]
+  },
+  {
+    "id": "http-page-in",
+    "type": "http in",
+    "z": "ss4-http-tab",
+    "name": "GET /ss4",
+    "url": "/ss4",
+    "method": "get",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 120,
+    "y": 400,
+    "wires": [
+      [
+        "http-page-template"
+      ]
+    ]
+  },
+  {
+    "id": "http-page-template",
+    "type": "template",
+    "z": "ss4-http-tab",
+    "name": "ss4 page",
+    "field": "payload",
+    "fieldType": "msg",
+    "format": "handlebars",
+    "syntax": "mustache",
+    "template": "<!doctype html> <html lang=\"ru\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <title>ss4 MQTT</title> <style> :root{font-family:Segoe UI,Arial,sans-serif;color:#1f2933;background:#eef2f5}body{margin:0}.top{background:#0b90bd;color:white;padding:14px 22px;font-weight:700}.wrap{padding:16px;display:grid;gap:14px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}.card{background:white;border:1px solid #d9e1e8;border-radius:6px;padding:12px}.label{color:#657789;font-size:12px;text-transform:uppercase}.value{font-size:20px;font-weight:700;margin-top:5px;overflow:hidden;text-overflow:ellipsis}.value.long{font-size:14px;line-height:1.35;max-height:58px;overflow:auto}.section{background:white;border:1px solid #d9e1e8;border-radius:6px;overflow:auto}.section h2{font-size:16px;margin:0;padding:12px;border-bottom:1px solid #d9e1e8;color:#0b6f95}.tools{display:flex;gap:8px;align-items:center;background:white;border:1px solid #d9e1e8;border-radius:6px;padding:10px 12px}.tools input{width:280px;max-width:100%;padding:7px 9px;border:1px solid #cbd5df;border-radius:4px}.tools select{padding:7px 9px;border:1px solid #cbd5df;border-radius:4px;background:white}.tools button{padding:7px 10px;border:1px solid #cbd5df;border-radius:4px;background:#f8fafc;cursor:pointer}.tools button:hover{background:#eef2f5}.stale td{color:#9a3412;background:#fff7ed}.badrow td{color:#b42318;background:#fff1f1}.small{font-size:13px;font-weight:600;color:#657789}.value.warn{color:#9a3412}.banner{background:white;border:1px solid #d9e1e8;border-left:5px solid #718096;border-radius:6px;padding:10px 12px;font-weight:700}.banner.ok{border-left-color:#067647;color:#067647}.banner.warn{border-left-color:#9a3412;color:#9a3412}.banner.bad{border-left-color:#b42318;color:#b42318}.banner .muted{font-weight:500}.spark{display:inline-flex;align-items:flex-end;gap:2px;height:34px;margin-top:6px}.spark span{width:5px;background:#0b90bd;display:block;min-height:2px}.trendline{margin-top:6px;color:#657789;font-size:12px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #e6edf2;padding:6px 8px;text-align:left;white-space:nowrap}th{background:#f6f8fa;font-weight:600}th[data-sort]{cursor:pointer}th[data-sort]:hover{background:#e8eef5}.clickable{cursor:pointer}.clickable:hover td{background:#eef6fb}.num{text-align:right;font-variant-numeric:tabular-nums}.muted{color:#718096}.bad{color:#b42318}.ok{color:#067647}@media(max-width:760px){.cards{grid-template-columns:1fr}.wrap{padding:10px}} </style> </head> <body> <div class=\"top\">ss4 MQTT</div> <div class=\"wrap\">   <div id=\"overall\" class=\"banner warn\">NO DATA <span class=\"muted\">waiting for MQTT</span></div>   <div class=\"tools\"><span class=\"label\">filter</span><input id=\"filter\" placeholder=\"kpz, name, reg, addr\"><select id=\"mode\"><option value=\"all\">all</option><option value=\"bad\">bad</option><option value=\"stale\">stale</option></select><select id=\"limit\"><option value=\"100\">100</option><option value=\"500\" selected>500</option><option value=\"1000\">1000</option><option value=\"5000\">5000</option></select><select id=\"staleLimit\"><option value=\"30000\">stale 30s</option><option value=\"60000\">stale 60s</option><option value=\"120000\">stale 120s</option><option value=\"300000\">stale 300s</option></select><button id=\"clearFilter\">clear filter</button><button id=\"resetView\">reset view</button><button id=\"refreshSnapshot\">refresh snapshot</button><button id=\"pause\">pause</button><button id=\"clearAlarms\">clear alarms</button><button id=\"exportValues\">export values</button><button id=\"exportAlarms\">export alarms</button><span id=\"ws\" class=\"muted\">ws...</span></div>   <div class=\"cards\">     <div class=\"card\"><div class=\"label\">status</div><div id=\"status\" class=\"value muted\">...</div></div>     <div class=\"card\"><div class=\"label\">health</div><div id=\"health\" class=\"value long muted\">...</div></div>     <div class=\"card\"><div class=\"label\">visible / filtered / total</div><div id=\"count\" class=\"value muted\">0 / 0 / 0</div></div><div class=\"card\"><div class=\"label\">stale</div><div id=\"staleCount\" class=\"value muted\">0</div></div><div class=\"card\"><div class=\"label\">bad quality</div><div id=\"badCount\" class=\"value muted\">0</div></div><div class=\"card\"><div class=\"label\">active alarms</div><div id=\"alarmCount\" class=\"value muted\">0</div></div><div class=\"card\"><div class=\"label\">alarm states</div><div id=\"alarmStateCount\" class=\"value muted\">0</div></div><div class=\"card\"><div class=\"label\">msg/min</div><div id=\"rate\" class=\"value muted\">0</div></div><div class=\"card\"><div class=\"label\">last msg</div><div id=\"lastMsg\" class=\"value long muted\">...</div></div><div class=\"card\"><div class=\"label\">snapshot</div><div id=\"snapshotInfo\" class=\"value long muted\">not loaded</div></div>   </div>   <div class=\"section\"><h2>KPZ / group summary</h2><table><thead><tr><th>kpz</th><th>kpz name</th><th>group</th><th>total</th><th>bad</th><th>stale</th></tr></thead><tbody id=\"summary\"><tr><td colspan=\"6\" class=\"muted\">waiting...</td></tr></tbody></table></div> <div class=\"section\"><h2>Selected value</h2><div id=\"selected\" class=\"muted\" style=\"padding:10px 12px\">click a value row</div></div> <div class=\"section\"><h2>Latest values</h2><table><thead><tr><th data-sort=\"kpz_id\">kpz</th><th data-sort=\"kpz_name\">kpz name</th><th data-sort=\"group_id\">group</th><th data-sort=\"reg_id\">reg</th><th data-sort=\"addr\">addr</th><th data-sort=\"name\">name</th><th data-sort=\"value\">value</th><th data-sort=\"quality\">quality</th><th data-sort=\"age\">age</th><th data-sort=\"received_at\">received</th></tr></thead><tbody id=\"values\"><tr><td colspan=\"10\" class=\"muted\">waiting...</td></tr></tbody></table></div>   <div class=\"section\"><h2>Alarm states</h2><table><thead><tr><th>last</th><th>first</th><th>kpz</th><th>reg</th><th>rule</th><th>state</th><th>value</th><th>sev</th><th>repeats</th><th>code</th><th>message</th></tr></thead><tbody id=\"alarms\"><tr><td colspan=\"11\" class=\"muted\">waiting...</td></tr></tbody></table></div> </div> <script> const esc=v=>String(v??'').replace(/[&<>\\\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\\"':'&quot;'}[ch])); const dt=v=>v?new Date(v).toLocaleTimeString():''; const age=v=>v?Math.max(0,Math.round((Date.now()-v)/1000)):0; const fmt=v=>typeof v==='number'?Number(v.toFixed(3)):v; const prefsKey='ss4DashboardPrefs'; const loadPrefs=()=>{try{return JSON.parse(localStorage.getItem(prefsKey)||'{}')}catch(e){return {}}}; const savePrefs=()=>{try{localStorage.setItem(prefsKey,JSON.stringify({query,mode,rowLimit,sortKey,sortDir,staleMs}))}catch(e){}}; const prefs=loadPrefs(); const latest={};const trends={};const alarms=[]; const msgTimes=[]; let visibleRows=[]; let lastMessageAt=0; let snapshotAt=0; let selectedKey=''; let query=String(prefs.query||''); let mode=prefs.mode||'all'; let rowLimit=Number(prefs.rowLimit)||500; let sortKey=prefs.sortKey||'kpz_id'; let sortDir=Number(prefs.sortDir)||1; let staleMs=Number(prefs.staleMs)||30000; let paused=false; let drawTimer=0; const buffer=[]; function requestDraw(){if(drawTimer)return;drawTimer=setTimeout(()=>{drawTimer=0;draw();},250);} function updatePauseButton(){const b=document.getElementById('pause');if(b)b.textContent=paused?`resume (${buffer.length})`:'pause';} function rowText(v){return [v.kpz_id,v.kpz_name,v.group_id,v.reg_id,v.addr,v.name,v.value,v.quality].join(' ').toLowerCase();} function alarmKey(a){return [a.kpz_id,a.reg_id,a.rule_id].join('/');} function isAlarmActive(a){return !['off','ok','clear','cleared','normal'].includes(String(a.event||'').toLowerCase());} function upsertAlarm(a){const key=alarmKey(a); const i=alarms.findIndex(x=>alarmKey(x)===key); const now=Date.now(); const row={...a,key,received_at:a.received_at||now,first_seen:a.first_seen||a.received_at||now,repeats:Number(a.repeats)||1}; if(i>=0){row.first_seen=alarms[i].first_seen||row.first_seen; row.repeats=(Number(alarms[i].repeats)||0)+1; alarms[i]=row;} else alarms.unshift(row); alarms.sort((a,b)=>(isAlarmActive(b)-isAlarmActive(a))||((b.received_at||0)-(a.received_at||0)));} function draw(){   const now=Date.now();   const cmp=(a,b)=>{const av=sortKey==='age'?age(a.received_at):a[sortKey]; const bv=sortKey==='age'?age(b.received_at):b[sortKey]; if(typeof av==='number'&&typeof bv==='number')return (av-bv)*sortDir; return String(av??'').localeCompare(String(bv??''))*sortDir;}; const filtered=Object.values(latest).filter(v=>(!query||rowText(v).includes(query))&&(mode==='all'||(mode==='bad'&&String(v.quality||'').toLowerCase()!=='ok')||(mode==='stale'&&now-(v.received_at||0)>staleMs))).sort(cmp); const vals=filtered.slice(0,rowLimit); visibleRows=vals;   while(msgTimes.length&&now-msgTimes[0]>60000)msgTimes.shift(); const all=Object.values(latest); const staleTotal=all.filter(v=>now-(v.received_at||0)>staleMs).length; const badTotal=all.filter(v=>String(v.quality||'').toLowerCase()!=='ok').length; const overall=document.getElementById('overall'); const noData=!lastMessageAt; const noLive=lastMessageAt&&now-lastMessageAt>staleMs; const activeAlarms=alarms.filter(isAlarmActive).length; const state=activeAlarms?'ALARMS':badTotal?'BAD':staleTotal?'STALE':noData?'NO DATA':noLive?'NO LIVE':'OK'; overall.className='banner '+(state==='OK'?'ok':(state==='BAD'||state==='ALARMS'||state==='NO DATA'?'bad':'warn')); overall.innerHTML=`${state} <span class=\"muted\">values=${all.length}, filtered=${filtered.length}, visible=${vals.length}, bad=${badTotal}, stale=${staleTotal}, alarms=${activeAlarms}/${alarms.length}, last=${lastMessageAt?age(lastMessageAt)+'s ago':'never'}</span>`; document.getElementById('count').textContent=`${vals.length} / ${filtered.length} / ${all.length}`; document.getElementById('staleCount').textContent=staleTotal; document.getElementById('staleCount').className='value '+(staleTotal?'warn':'ok'); document.getElementById('badCount').textContent=badTotal; document.getElementById('badCount').className='value '+(badTotal?'bad':'ok'); document.getElementById('alarmCount').textContent=activeAlarms; document.getElementById('alarmCount').className='value '+(activeAlarms?'bad':'ok'); const alarmStateCount=document.getElementById('alarmStateCount'); if(alarmStateCount){alarmStateCount.textContent=alarms.length; alarmStateCount.className='value '+(alarms.length?'warn':'ok');} document.getElementById('rate').textContent=msgTimes.length; document.getElementById('rate').className='value '+(msgTimes.length?'ok':'warn'); document.getElementById('lastMsg').textContent=lastMessageAt?`${age(lastMessageAt)}s ago`:'no messages';   const summary={}; all.forEach(v=>{const k=`${v.kpz_id}/${v.group_id??''}`; const s=summary[k]||(summary[k]={kpz_id:v.kpz_id,kpz_name:v.kpz_name||'',group_id:v.group_id,total:0,bad:0,stale:0}); s.total++; if(String(v.quality||'').toLowerCase()!=='ok')s.bad++; if(now-(v.received_at||0)>staleMs)s.stale++;}); const summaryRows=Object.values(summary).sort((a,b)=>(a.kpz_id-b.kpz_id)||(Number(a.group_id)-Number(b.group_id))); document.getElementById('summary').innerHTML=summaryRows.length?summaryRows.map(s=>`<tr class=\"clickable ${s.bad?'badrow':(s.stale?'stale':'')}\" data-kpz=\"${esc(s.kpz_id)}\" data-group=\"${esc(s.group_id)}\"><td>${esc(s.kpz_id)}</td><td>${esc(s.kpz_name)}</td><td>${esc(s.group_id)}</td><td class=\"num\">${s.total}</td><td class=\"num\">${s.bad}</td><td class=\"num\">${s.stale}</td></tr>`).join(''):'<tr><td colspan=\"6\" class=\"muted\">waiting for ss4/v1/values/+</td></tr>'; document.querySelectorAll('#summary tr[data-kpz]').forEach(tr=>tr.addEventListener('click',()=>setFilter(`${tr.dataset.kpz} ${tr.dataset.group}`))); const selected=latest[selectedKey]; if(selected){const tr=trends[selectedKey]||[]; const nums=tr.map(x=>Number(x.value)).filter(Number.isFinite); const min=nums.length?Math.min(...nums):0; const max=nums.length?Math.max(...nums):0; const span=Math.max(1,max-min); const bars=tr.slice(-30).map(x=>`<span title=\"${esc(fmt(x.value))}\" style=\"height:${Math.max(2,Math.round(((Number(x.value)-min)/span)*30)+2)}px\"></span>`).join(''); document.getElementById('selected').innerHTML=`<b>${esc(selected.kpz_name)} / ${esc(selected.name)}</b><br>kpz=${esc(selected.kpz_id)}, group=${esc(selected.group_id)}, reg=${esc(selected.reg_id)}, addr=${esc(selected.addr)}<br>value=<b>${esc(fmt(selected.value))}</b>, quality=${esc(selected.quality)}, age=${age(selected.received_at)}s, received=${esc(dt(selected.received_at))}<div class=\"spark\">${bars}</div><div class=\"trendline\">samples=${tr.length}, min=${esc(fmt(min))}, max=${esc(fmt(max))} <button id=\"clearTrend\">clear trend</button></div>`;} else {document.getElementById('selected').innerHTML='click a value row';} document.getElementById('values').innerHTML=vals.length?vals.map(v=>`<tr class=\"clickable ${String(v.quality||'').toLowerCase()!=='ok'?'badrow':(now-(v.received_at||0)>staleMs?'stale':'')}\" data-value-key=\"${esc(`${v.kpz_id}/${v.reg_id}`)}\"><td>${esc(v.kpz_id)}</td><td>${esc(v.kpz_name)}</td><td>${esc(v.group_id)}</td><td>${esc(v.reg_id)}</td><td>${esc(v.addr)}</td><td>${esc(v.name)}</td><td class=\"num\">${esc(fmt(v.value))}</td><td>${esc(v.quality)}</td><td class=\"num\">${age(v.received_at)}s</td><td>${esc(dt(v.received_at))}</td></tr>`).join(''):'<tr><td colspan=\"10\" class=\"muted\">waiting for ss4/v1/values/+</td></tr>';   document.querySelectorAll('#values tr[data-value-key]').forEach(tr=>tr.addEventListener('click',()=>{selectedKey=tr.dataset.valueKey;draw();})); const clearTrend=document.getElementById('clearTrend'); if(clearTrend)clearTrend.addEventListener('click',()=>{if(selectedKey&&trends[selectedKey])trends[selectedKey].splice(0,trends[selectedKey].length);draw();}); document.getElementById('alarms').innerHTML=alarms.length?alarms.map(a=>`<tr class=\"clickable ${isAlarmActive(a)?'badrow':''}\" data-alarm-key=\"${esc(`${a.kpz_id}/${a.reg_id}`)}\" data-alarm-filter=\"${esc(`${a.kpz_id} ${a.reg_id}`)}\"><td>${esc(dt(a.received_at))}</td><td>${esc(dt(a.first_seen))}</td><td>${esc(a.kpz_id)}</td><td>${esc(a.reg_id)}</td><td>${esc(a.rule_id)}</td><td>${esc(a.event)}</td><td class=\"num\">${esc(fmt(a.value))}</td><td>${esc(a.severity)}</td><td class=\"num\">${esc(a.repeats||1)}</td><td>${esc(a.code)}</td><td>${esc(a.message)}</td></tr>`).join(''):'<tr><td colspan=\"11\" class=\"muted\">waiting for ss4/v1/alarms/+/+</td></tr>';  document.querySelectorAll('#alarms tr[data-alarm-key]').forEach(tr=>tr.addEventListener('click',()=>{selectedKey=tr.dataset.alarmKey;setFilter(tr.dataset.alarmFilter);})); } function applyMsg(msg){   if(paused){buffer.push(msg);updatePauseButton();return;}   lastMessageAt=Date.now(); msgTimes.push(lastMessageAt);   const topic=msg.topic||''; const p=msg.payload;   if(topic.endsWith('/status')){const el=document.getElementById('status');el.textContent=String(p||'offline');el.className='value '+(p==='online'?'ok':'bad');}   else if(topic.endsWith('/health')){const he=document.getElementById('health'); he.textContent=p&&p.kind?`${p.kind}: ${p.message||''}`:'no health'; he.className='value long '+(p&&p.kind==='health_ok'?'ok':'warn');}   else if(topic.includes('/values/')){(p.values||[]).forEach(v=>{const key=`${p.kpz_id}/${v.reg_id}`; latest[key]={...v,kpz_id:p.kpz_id,kpz_name:p.kpz_name||'',received_at:Date.now()}; const tr=trends[key]||(trends[key]=[]); tr.push({ts:Date.now(),value:v.value}); if(tr.length>120)tr.splice(0,tr.length-120);});requestDraw();}   else if(topic.includes('/alarms/')){upsertAlarm({...p,received_at:Date.now()});requestDraw();} } function setFilter(v){const f=document.getElementById('filter');f.value=v;query=v.trim().toLowerCase();savePrefs();draw();} const filterEl=document.getElementById('filter'); const modeEl=document.getElementById('mode'); const limitEl=document.getElementById('limit'); const staleLimitEl=document.getElementById('staleLimit'); filterEl.value=query; modeEl.value=mode; limitEl.value=String(rowLimit); staleLimitEl.value=String(staleMs); filterEl.addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();savePrefs();draw();}); modeEl.addEventListener('change',e=>{mode=e.target.value;savePrefs();draw();}); limitEl.addEventListener('change',e=>{rowLimit=Number(e.target.value)||500;savePrefs();draw();}); staleLimitEl.addEventListener('change',e=>{staleMs=Number(e.target.value)||30000;savePrefs();draw();}); document.getElementById('clearFilter').addEventListener('click',()=>{filterEl.value='';query='';savePrefs();draw();}); document.getElementById('resetView').addEventListener('click',()=>{query='';mode='all';rowLimit=500;sortKey='kpz_id';sortDir=1;staleMs=30000;filterEl.value='';modeEl.value=mode;limitEl.value=String(rowLimit);staleLimitEl.value=String(staleMs);savePrefs();draw();}); document.querySelectorAll('th[data-sort]').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.sort;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1;}savePrefs();draw();})); function csv(v){const s=String(v??'');return /[\",\\r\\n;]/.test(s)?'\"'+s.replace(/\"/g,'\"\"')+'\"':s;} function downloadCsv(name,rows,cols){const lines=[cols.map(c=>csv(c[0])).join(';')].concat(rows.map(r=>cols.map(c=>csv(typeof c[1]==='function'?c[1](r):r[c[1]])).join(';'))); const blob=new Blob([lines.join('\\r\\n')],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},0);} document.getElementById('clearAlarms').addEventListener('click',()=>{alarms.splice(0,alarms.length);draw();}); document.getElementById('exportValues').addEventListener('click',()=>downloadCsv(`ss4-values-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`,visibleRows,[['kpz','kpz_id'],['kpz_name','kpz_name'],['group','group_id'],['reg','reg_id'],['addr','addr'],['name','name'],['tip','tip'],['value','value'],['quality','quality'],['age_s',r=>age(r.received_at)],['received',r=>new Date(r.received_at||0).toISOString()]])); document.getElementById('exportAlarms').addEventListener('click',()=>downloadCsv(`ss4-alarm-states-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`,alarms,[['last',r=>new Date(r.received_at||0).toISOString()],['first',r=>new Date(r.first_seen||0).toISOString()],['kpz','kpz_id'],['reg','reg_id'],['rule','rule_id'],['event','event'],['value','value'],['severity','severity'],['repeats','repeats'],['code','code'],['message','message']])); document.getElementById('pause').addEventListener('click',()=>{paused=!paused;updatePauseButton();if(!paused){const copy=buffer.splice(0,buffer.length);updatePauseButton();copy.forEach(applyMsg);draw();}}); document.getElementById('refreshSnapshot').addEventListener('click',()=>loadSnapshot()); async function loadSnapshot(){const info=document.getElementById('snapshotInfo'); try{if(info){info.textContent='loading...';info.className='value long warn';} const r=await fetch('/ss4api',{cache:'no-store'}); if(!r.ok)throw new Error('HTTP '+r.status); const s=await r.json(); if(s.status){const el=document.getElementById('status');el.textContent=String(s.status);el.className='value '+(s.status==='online'?'ok':'bad');} if(s.health&&s.health.kind){const he=document.getElementById('health');he.textContent=`${s.health.kind}: ${s.health.message||''}`;he.className='value long '+(s.health.kind==='health_ok'?'ok':'warn');} Object.entries(s.values||{}).forEach(([key,v])=>{latest[key]=v; const tr=trends[key]||(trends[key]=[]); if(typeof v.value==='number'&&!tr.length)tr.push({ts:v.received_at||Date.now(),value:v.value});}); alarms.splice(0,alarms.length); const states=s.alarm_states&&Object.keys(s.alarm_states).length?Object.values(s.alarm_states):(Array.isArray(s.alarms)?s.alarms:[]); states.forEach(upsertAlarm); lastMessageAt=Math.max(s.status_at||0,s.health_at||0,...Object.values(latest).map(v=>v.received_at||0),...alarms.map(a=>a.received_at||0)); snapshotAt=Date.now(); if(info){info.textContent=`${dt(snapshotAt)}, values=${Object.keys(s.values||{}).length}, alarm states=${alarms.length}`;info.className='value long ok';} draw();}catch(err){if(info){info.textContent='snapshot error';info.className='value long bad';} console.warn(err);}} function connect(){const s=document.getElementById('ws');s.textContent='ws connecting';const ws=new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ss4ws`);ws.onopen=()=>{s.textContent='ws connected';s.className='ok';loadSnapshot();};ws.onmessage=e=>{try{applyMsg(JSON.parse(e.data));}catch(err){console.warn(err);}};ws.onclose=()=>{s.textContent='ws reconnecting';s.className='bad';setTimeout(connect,1500);};} draw();setInterval(draw,5000);loadSnapshot();connect(); </script> </body> </html>",
+    "output": "str",
+    "x": 340,
+    "y": 400,
+    "wires": [
+      [
+        "http-page-response"
+      ]
+    ]
+  },
+  {
+    "id": "http-page-response",
+    "type": "http response",
+    "z": "ss4-http-tab",
+    "name": "HTML response",
+    "statusCode": "",
+    "headers": {
+      "content-type": "text/html; charset=utf-8"
+    },
+    "x": 570,
+    "y": 400,
+    "wires": []
+  },
+  {
+    "id": "http-api-in",
+    "type": "http in",
+    "z": "ss4-http-tab",
+    "name": "GET /ss4api",
+    "url": "/ss4api",
+    "method": "get",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 130,
+    "y": 460,
+    "wires": [
+      [
+        "http-api-data"
+      ]
+    ]
+  },
+  {
+    "id": "http-api-data",
+    "type": "function",
+    "z": "ss4-http-tab",
+    "name": "build api response",
+    "x": 360,
+    "y": 460,
+    "wires": [
+      [
+        "http-api-response"
+      ]
+    ],
+    "func": "const values = flow.get('latestValues') || {};\nconst alarms = flow.get('latestAlarms') || [];\nconst alarm_states = flow.get('latestAlarmStates') || {};\nmsg.payload = JSON.stringify({\n    status: flow.get('status') || '',\n    status_at: flow.get('statusAt') || 0,\n    health: flow.get('health') || {},\n    health_at: flow.get('healthAt') || 0,\n    values,\n    alarms,\n    alarm_states\n});\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": []
+  },
+  {
+    "id": "http-api-response",
+    "type": "http response",
+    "z": "ss4-http-tab",
+    "name": "JSON response",
+    "statusCode": "",
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "x": 590,
+    "y": 460,
+    "wires": []
+  }
+]

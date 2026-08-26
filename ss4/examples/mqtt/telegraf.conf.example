@@ -1,0 +1,30 @@
+# Telegraf example: ss4 MQTT values -> InfluxDB 2.x.
+# Replace urls/token/organization/bucket before use.
+
+[[inputs.mqtt_consumer]]
+  servers = ["tcp://127.0.0.1:1883"]
+  topics = ["ss4/v1/values/+"]
+  qos = 1
+  persistent_session = false
+  client_id = "telegraf-ss4"
+  data_format = "json_v2"
+
+  [[inputs.mqtt_consumer.json_v2]]
+    measurement_name = "ss4_values"
+    timestamp_path = "ts"
+    timestamp_format = "unix"
+
+    [[inputs.mqtt_consumer.json_v2.tag]]
+      path = "kpz_id"
+      rename = "kpz_id"
+
+    [[inputs.mqtt_consumer.json_v2.object]]
+      path = "values"
+      included_keys = ["reg_id", "tip", "value", "quality"]
+      tags = ["reg_id", "tip", "quality"]
+
+[[outputs.influxdb_v2]]
+  urls = ["http://127.0.0.1:8086"]
+  token = "change-me"
+  organization = "ss4"
+  bucket = "ss4"

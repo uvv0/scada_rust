@@ -1,0 +1,14 @@
+# Local development broker only.
+# For production, disable anonymous access and enable TLS/auth/ACL.
+
+listener 1883 127.0.0.1
+allow_anonymous true
+
+persistence true
+persistence_location ./mosquitto-data/
+
+log_dest stdout
+log_type error
+log_type warning
+log_type notice
+connection_messages true

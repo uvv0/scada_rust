@@ -1,0 +1,23 @@
+/target/
+
+# Local runtime config and secrets
+ss4.toml
+*.local.toml
+.env
+.env.*
+!.env.example
+
+# IDE/user files
+.idea/
+.vscode/
+
+# Profiling and generated diagnostics
+symcache/
+*.etl
+*.etl.*
+*.NGENPDB/
+wpa_export_*/
+
+# OS/editor noise
+Thumbs.db
+*.tmp
