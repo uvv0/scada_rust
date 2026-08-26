@@ -25,3 +25,7 @@ Rust SCADA server application with modular architecture.
 ## Configuration
 
 `ss4.toml` — database connections, modbus objects, polling intervals, script bindings.
+
+## Database Setup
+
+See [init_db.sql](init_db.sql) or [init_db.py](init_db.py) for database initialization.
