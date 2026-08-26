@@ -15,13 +15,6 @@ Firmware for industrial RTU/PLC devices running on ARM Cortex-M7. Provides SCADA
 - **Archive storage** — ring archives in external SPI flash (W25Q128)
 - **Thread profiler** — runtime execution time monitoring
 
-## Hardware
-
-- MCU: STM32H7 series
-- External flash: W25Q128 (SPI4)
-- Ethernet: RMII with LAN8742 PHY
-- UART: multiple ports for RS-485/RS-232
-
 ## Build
 
 - Toolchain: IAR Embedded Workbench for ARM
@@ -39,13 +32,3 @@ Firmware for industrial RTU/PLC devices running on ARM Cortex-M7. Provides SCADA
 - `src/script.rs` — Lua script integration
 - `src/ui/` — embedded UI rendering
 - `src/app/windows/` — UI window implementations (alarm, archive, graph, editor)
-
-## Firmware modules
-
-- `board.c` / `drv_*.c` — HAL drivers (GPIO, ETH, USART)
-- `web_server.c` — HTTP server and Lua web editor
-- `lua_vm_module.c` — Lua VM integration layer
-- `tag_poll_scheduler.c` — polling scheduler
-- `thread_profiler.c` — execution profiler
-- `qspi_modules.c` — external module management
-- `module_service_api.c` — module service API
