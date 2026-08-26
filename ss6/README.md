@@ -1,47 +1,39 @@
-# ss6 (Rust)
+# ss6
 
-Web viewer for KPZ windows, live values and write commands.
+Rust SCADA web server with Modbus integration and REST API.
 
-## Purpose
-`ss6` provides a browser UI for:
-- selecting `KPZ -> Group -> Reg`
-- viewing charts and window previews
-- reading values from DB or directly from device via Modbus/UDP
-- sending TU (`FC5`) and write commands (`FC6/FC16`)
+## Features
 
-## Auth
-- Web users are stored in `public.web_users`
-- `ss6` now supports both password formats:
-  - legacy `SHA-256(salt:password)`
-  - current `argon2id` PHC hashes
-- New bootstrap users created by `ss6` are stored in `argon2id`
-- This keeps compatibility with accounts managed in `ss7`
+- **Modbus TCP** — master/client for polling remote devices
+- **REST API** — JSON endpoints for tags, alarms, archives
+- **WebSocket** — real-time data streaming to web clients
+- **SQLite** — embedded database for configuration and runtime data
+- **Web UI** — static HTML/JS frontend served by the application
 
-## Compatibility With ss7
-- UI window lists are built from real windows in `ui.kpz_window` first, then from template-based bindings
-- For real windows (`id > 0`) bindings are loaded from `ui.kpz_window_reg_binding` and `ui.kpz_window_text_item`
-- `ss7` now stores web-account passwords in `argon2id`; `ss6` accepts those accounts without schema changes
+## Architecture
 
-## Preview
-- Register widgets show analog colors by alarm-rule and discrete `0/1` state
-- Text items without `reg_id` are rendered as static labels and do not participate in polling
+- `src/main.rs` — entry point, Axum server setup
+- `src/web.rs` — HTTP routes and WebSocket handlers
+- `src/handlers.rs` — API endpoint implementations
+- `src/db.rs` — SQLite data access
+- `src/modbus.rs` — Modbus client protocol
+- `src/models.rs` — API data structures
+- `src/config.rs` — configuration from `ss6.toml`
+- `build.rs` — build-time asset embedding
 
-## Real Polling
-- Status shows `ip/modem`
-- Request/response trace shows `TX` then `RX` or `ERR`
-- Commands are glued into shared UDP packets when possible
-- Waiting timeout: `5000 ms`
+## API
 
-## Run
-```powershell
-cargo run
-```
+- `GET /api/tags` — list all tags
+- `GET /api/tags/{id}` — single tag value
+- `POST /api/tags/{id}` — write tag value
+- `GET /api/alarms` — alarm list
+- `GET /api/archives` — archive data
+- `WS /ws` — WebSocket for real-time updates
 
-or
+## Configuration
 
-```powershell
-cargo build --release
-.\target\release\ss6.exe
-```
+`ss6.toml` — server port, database path, Modbus connection settings, tag definitions.
 
-Service address: `http://127.0.0.1:8097`
+## Tests
+
+- `tests/` — JavaScript integration tests (Vitest + Playwright)

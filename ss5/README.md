@@ -1,93 +1,51 @@
-# ss5 (Rust)
+# ss5
 
-## Назначение
-`ss5` — desktop инженерный инструмент для работы с KPZ/OBJ/REG, alarm и скриптами.
+Embedded Rust SCADA firmware for STM32H7 microcontrollers.
 
-## Основные окна
-- `KPZ editor` — редактирование KPZ параметров.
-- `OBJ editor` — редактирование объекта связи.
-- `REG editor` — редактирование регистров.
-- `Refs editor` — справочники (`ip/port/speed/...`).
-- `KPZ I/O` — ручной опрос/запись регистров.
-- `Alarm rules` — правила и состояние тревог.
-- `GScript editor` + `GScript output`.
-- `ARX graph` — график по `arx_val`.
+## Overview
 
-## UI-редактор в ss5
-- Поддерживает KPZ window/bindings (`ui.kpz_window*`).
-- Позволяет выбирать группы, добавлять регистры в bind и сохранять.
-- `KPZ Preview` использует реальные координаты и размеры элементов (`x/y/w/h`) из `ui.kpz_window_reg_binding`.
-- В preview подписи регистров рисуются сбоку от кнопок, как в `ss7`.
-- Кнопка `Сосчитать` выполняет реальный пакетный Modbus-opros glued-блоками, близко к `ss7`.
+Firmware for industrial RTU/PLC devices running on ARM Cortex-M7. Provides SCADA data acquisition, Lua scripting, Modbus, and web interface on bare metal (no OS).
 
-## Актуальные правки
-- В `REG editor` кнопка `New` не очищает поля (удобно для ввода похожих регистров).
-- Генератор диапазона тестовых KPZ теперь создает записи с фиксированным `rtu=301`; изменяются только `id` и `modem`.
-- В окне генератора диапазона добавлена явная подсказка про `rtu=301`.
+## Features
 
-## Сборка
-```powershell
-cargo check
-cargo build --release
-```
+- **Modbus TCP/RTU** — slave/server implementation
+- **Lua VM** — embedded Lua 5.4.8 for user scripts running in XIP mode
+- **Web server** — lightweight HTTP server for HMI and configuration
+- **Tag polling** — scheduled data acquisition from connected devices
+- **Archive storage** — ring archives in external SPI flash (W25Q128)
+- **Thread profiler** — runtime execution time monitoring
 
-## Проверка проекта
-Проверено 2026-07-13:
-- `cargo check` проходит успешно.
-- `cargo clippy --all-targets -- -D warnings` пока не проходит: найдено 42 предупреждения Clippy. Большая часть относится к механической чистке (`collapsible_if`, `manual_range_contains`, `identity_op`, `get_first`, лишние casts), но есть несколько мест, которые стоит посмотреть руками.
+## Hardware
 
-Рекомендуемый быстрый цикл перед правками:
-```powershell
-cargo fmt
-cargo check
-cargo clippy --all-targets
-```
+- MCU: STM32H7 series
+- External flash: W25Q128 (SPI4)
+- Ethernet: RMII with LAN8742 PHY
+- UART: multiple ports for RS-485/RS-232
 
-## Запуск
-```powershell
-.\target\release\ss5.exe
-```
+## Build
 
-## Конфигурация БД
-Приложение ищет `ss5.toml` рядом с `ss5.exe`. Пример есть в `ss5.toml.example`.
+- Toolchain: IAR Embedded Workbench for ARM
+- Build system: Makefile + custom scripts
+- Flash programming: J-Link
 
-Приоритет настроек:
-1. переменные окружения `PG_HOST`, `PG_PORT`, `PG_DB`, `PG_USER`, `PG_PASS`;
-2. секция `[db]` в `ss5.toml`;
-3. значения по умолчанию из `src/db.rs`.
+## Architecture
 
-Если основной host не `localhost` и подключение не удалось, `Db::connect_from_env()` пробует fallback на `localhost` с тем же портом, пользователем, паролем и именем БД.
+- `src/main.rs` — RTIC application entry point
+- `src/app.rs` — main application state machine
+- `src/modbus.rs` — Modbus protocol stack
+- `src/modbus_service.rs` — request handler
+- `src/db.rs` — in-memory data storage
+- `src/models.rs` — data structures
+- `src/script.rs` — Lua script integration
+- `src/ui/` — embedded UI rendering
+- `src/app/windows/` — UI window implementations (alarm, archive, graph, editor)
 
-## Runtime Scheduler Config (ss4)
-- Added `Runtime cfg...` window in `ss5`.
-- This window edits global scheduler parameters in DB table `public.scheduler_runtime_cfg`:
-  - `no_response_failures`
-  - `no_response_backoff_sec`
-- These parameters are global for the whole `ss4` scheduler (not per-KPZ).
+## Firmware modules
 
-## GScript Templates
-- Template storage:
-  - `ui.gscript_template`: reusable PRE/POST templates and limits (`max_words`, `max_k`, `en`, `ver`, `elam`).
-  - `ui.gscript_group_template`: binding `group_id -> template_id`.
-  - Direct group script remains in `public.g_script`.
-- Effective script priority:
-  1. direct `public.g_script` for group;
-  2. if missing, template from `ui.gscript_group_template`;
-  3. otherwise script is absent.
-- GScript editor actions:
-  - `Load` loads direct group script;
-  - `Load effective` loads script by effective priority above;
-  - `Save` writes direct group script;
-  - `Load tmpl` / `Save tmpl` / `Delete tmpl` manage templates;
-  - `Bind->group` sets or clears template binding for group.
-
-## Module Docs
-- `MODULES_DOC_RU.md` - module map in Markdown.
-- `MODULES_DOC_RU.html` - module map in HTML.
-
-## Что улучшить дальше
-- Разобрать Clippy backlog: сначала места с одинаковыми ветками в `src/app/windows/kpz_io.rs`, затем механические предупреждения по `collapsible_if` и диапазонам.
-- Добавить минимальные unit-тесты для чистой логики: `src/modbus.rs`, `src/utils.rs`, `src/script.rs`. Сейчас сборка проверяется, но тестового контура в проекте почти нет.
-- Вынести длинные DB-методы с большим числом аргументов (`update_kpz_full`, `update_obj`, `create_obj`, `update_reg_edit`) на входные DTO/patch-структуры. Это уменьшит риск перепутать поля при вызове.
-- Разделить bootstrap/migration SQL из `Db::connect_from_env()` в отдельный модуль или SQL-файл. Сейчас приложение само создает/дополняет таблицы `ui.*` и `public.scheduler_runtime_cfg`, что удобно, но усложняет ревизию схемы.
-- Убрать временные диагностические строки `[POST] ...` из `KPZ I/O Script` после финальной полевой проверки, если они больше не нужны оператору.
+- `board.c` / `drv_*.c` — HAL drivers (GPIO, ETH, USART)
+- `web_server.c` — HTTP server and Lua web editor
+- `lua_vm_module.c` — Lua VM integration layer
+- `tag_poll_scheduler.c` — polling scheduler
+- `thread_profiler.c` — execution profiler
+- `qspi_modules.c` — external module management
+- `module_service_api.c` — module service API
