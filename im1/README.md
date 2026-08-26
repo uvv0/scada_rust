@@ -5,7 +5,7 @@ SCADA simulator implementing IEC 60870-5-104 / Modbus protocols for industrial a
 ## Features
 
 - **IEC 60870-5-104** — standard telecontrol protocol for power systems and SCADA
-- **Modbus TCP** — slave/server mode
+- **Modbus UDP** — slave/server mode
 - **Async runtime** — tokio-based concurrent connection handling
 - **Configuration** — TOML-based point database and connection settings
 
