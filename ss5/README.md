@@ -4,12 +4,11 @@ Embedded Rust SCADA firmware for STM32H7 microcontrollers.
 
 ## Overview
 
-Firmware for industrial RTU/PLC devices running on ARM Cortex-M7. Provides SCADA data acquisition, Lua scripting, Modbus, and web interface on bare metal (no OS).
+Firmware for industrial RTU/PLC devices running on ARM Cortex-M7. Provides SCADA data acquisition, Modbus, and web interface on bare metal (no OS).
 
 ## Features
 
 - **Modbus TCP/RTU** — slave/server implementation
-- **Lua scripting** — user scripts for automation logic
 - **Web server** — lightweight HTTP server for HMI and configuration
 - **Tag polling** — scheduled data acquisition from connected devices
 
@@ -27,6 +26,5 @@ Firmware for industrial RTU/PLC devices running on ARM Cortex-M7. Provides SCADA
 - `src/modbus_service.rs` — request handler
 - `src/db.rs` — in-memory data storage
 - `src/models.rs` — data structures
-- `src/script.rs` — Lua script integration
 - `src/ui/` — embedded UI rendering
 - `src/app/windows/` — UI window implementations (alarm, archive, graph, editor)
