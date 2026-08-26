@@ -1,0 +1,8 @@
+device STM32H750XB
+si SWD
+speed 4000
+connect
+halt
+r
+go
+exit

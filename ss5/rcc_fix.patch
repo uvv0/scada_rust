@@ -1,0 +1,279 @@
+diff --git a/Inc/stm32h7xx.h b/Inc/stm32h7xx.h
+--- a/Inc/stm32h7xx.h
++++ b/Inc/stm32h7xx.h
+@@ -48,49 +48,61 @@
+ /* RCC */
+ #define RCC_BASE              ((uint32_t)0x58024400)
+ typedef struct {
+     __IO uint32_t CR;
++    __IO uint32_t HSICFGR;
++    __IO uint32_t CRRCR;
++    __IO uint32_t CSICFGR;
+     __IO uint32_t CFGR;
++    uint32_t RESERVED0;
+     __IO uint32_t D1CFGR;
+     __IO uint32_t D2CFGR;
+     __IO uint32_t D3CFGR;
++    uint32_t RESERVED1;
+     __IO uint32_t PLLCKSELR;
+     __IO uint32_t PLLCFGR;
+     __IO uint32_t PLL1DIVR;
+     __IO uint32_t PLL1FRACR;
+     __IO uint32_t PLL2DIVR;
+     __IO uint32_t PLL2FRACR;
+     __IO uint32_t PLL3DIVR;
+     __IO uint32_t PLL3FRACR;
+-    __IO uint32_t RESERVED0[0x10];
+-    __IO uint32_t DIER;
+-    __IO uint32_t SREQR;
+-    __IO uint32_t RESERVED1[4];
+-    __IO uint32_t APB4RSTR;
+-    __IO uint32_t APB2RSTR;
++    uint32_t RESERVED2;
++    __IO uint32_t D1CCIPR;
++    __IO uint32_t D2CCIP1R;
++    __IO uint32_t D2CCIP2R;
++    __IO uint32_t D3CCIPR;
++    uint32_t RESERVED3;
++    __IO uint32_t CIER;
++    __IO uint32_t CIFR;
++    __IO uint32_t CICR;
++    uint32_t RESERVED4;
++    __IO uint32_t BDCR;
++    __IO uint32_t CSR;
++    uint32_t RESERVED5;
++    __IO uint32_t AHB3RSTR;
++    __IO uint32_t AHB1RSTR;
++    __IO uint32_t AHB2RSTR;
++    __IO uint32_t AHB4RSTR;
+     __IO uint32_t APB3RSTR;
+-    __IO uint32_t RESERVED2[1];
+     __IO uint32_t APB1LRSTR;
+     __IO uint32_t APB1HRSTR;
+-    __IO uint32_t APB2LRSTR;
+-    __IO uint32_t APB3LRSTR;
+-    __IO uint32_t RESERVED3[5];
+-    __IO uint32_t AHB1RSTR;
+-    __IO uint32_t AHB2RSTR;
+-    __IO uint32_t AHB3RSTR;
+-    __IO uint32_t AHB4RSTR;
+-    __IO uint32_t RESERVED4[3];
+-    __IO uint32_t APB4ENR;
+-    __IO uint32_t APB2ENR;
+-    __IO uint32_t APB3ENR;
+-    __IO uint32_t RESERVED5[1];
++    __IO uint32_t APB2RSTR;
++    __IO uint32_t APB4RSTR;
++    __IO uint32_t GCR;
++    uint32_t RESERVED6;
++    __IO uint32_t D3AMR;
++    uint32_t RESERVED7[9];
++    __IO uint32_t RSR;
++    __IO uint32_t AHB3ENR;
++    __IO uint32_t AHB1ENR;
++    __IO uint32_t AHB2ENR;
++    __IO uint32_t AHB4ENR;
++    __IO uint32_t APB3ENR;
+     __IO uint32_t APB1LENR;
+     __IO uint32_t APB1HENR;
+-    __IO uint32_t APB2LENR;
+-    __IO uint32_t APB3LENR;
+-    __IO uint32_t RESERVED6[5];
+-    __IO uint32_t AHB1ENR;
+-    __IO uint32_t AHB2ENR;
+-    __IO uint32_t AHB3ENR;
+-    __IO uint32_t AHB4ENR;
+-    __IO uint32_t RESERVED7[0x30];
+-    __IO uint32_t BDCR;
++    __IO uint32_t APB2ENR;
++    __IO uint32_t APB4ENR;
+ } RCC_TypeDef;
+ #define RCC                  ((RCC_TypeDef *)RCC_BASE)
+ 
+-#define RCC_CFGR_SW          (0x3 << 0)
++#define RCC_CFGR_SW          (0x7 << 0)
+ #define RCC_CFGR_SW_HSI      (0x0 << 0)
+ #define RCC_CFGR_SW_HSE      (0x1 << 0)
+ #define RCC_CFGR_SW_PLL1     (0x3 << 0)
++#define RCC_CFGR_SWS         (0x7 << 3)
++#define RCC_CFGR_SWS_PLL1    (0x3 << 3)
+ 
+ #define RCC_D1CFGR_D1CPRE    (0xF << 8)
+-#define RCC_D2CFGR_APB1DIV   (0xF << 8)
+-#define RCC_D2CFGR_APB2DIV   (0xF << 12)
+-#define RCC_D2CFGR_APB3DIV   (0xF << 16)
++#define RCC_D1CFGR_APB3DIV   (0x7 << 4)
++#define RCC_D2CFGR_APB1DIV   (0x7 << 4)
++#define RCC_D2CFGR_APB2DIV   (0x7 << 8)
+ 
+ #define RCC_PLLCKSELR_PLLSRC (0x3 << 28)
+ #define RCC_PLLCKSELR_DIVM1  (0x3F << 0)
+ #define RCC_PLLCFGR_PLL1FRACEN (0x1 << 5)
+-#define RCC_PLL1FRACR_FRACN1 (0x1FFFF << 0)
+-#define RCC_PLL1DIVR_N1      (0x1FF << 8)
+-#define RCC_PLL1DIVR_P1      (0x7 << 24)
+-#define RCC_PLL1DIVR_R1      (0xFF << 16)
+-#define RCC_PLL1DIVR_Q1      (0xFF << 0)
++#define RCC_PLL1FRACR_FRACN1 (0x1FFF << 3)
++#define RCC_PLL1DIVR_N1      (0x1FF << 0)
++#define RCC_PLL1DIVR_P1      (0x7F << 9)
++#define RCC_PLL1DIVR_Q1      (0x7F << 16)
++#define RCC_PLL1DIVR_R1      (0x7F << 24)
+ 
+ /* PWR (0x58001000) */
+ #define PWR_BASE             ((uint32_t)0x58001000)
+-#define PWR_CR1              (*((volatile uint32_t *)(PWR_BASE + 0x00)))
+-#define PWR_CSR1             (*((volatile uint32_t *)(PWR_BASE + 0x08)))
+-#define PWR_CR1_VOS_SHIFT    13
+-#define PWR_CR1_VOS_MASK     (0x3 << 13)
+-#define PWR_CR1_VOS1         (0x2 << 13)
+-#define PWR_CSR1_ACTVOSRDY   (1 << 12)
++#define PWR_D3CR             (*((volatile uint32_t *)(PWR_BASE + 0x18)))
++#define PWR_D3CR_VOS_MASK    (0x3 << 14)
++#define PWR_D3CR_VOS1        (0x3 << 14)
++#define PWR_D3CR_VOSRDY      (1 << 13)
+diff --git a/Inc/stm32h7xx_hal_rcc.h b/Inc/stm32h7xx_hal_rcc.h
+--- a/Inc/stm32h7xx_hal_rcc.h
++++ b/Inc/stm32h7xx_hal_rcc.h
+@@ -91,22 +91,22 @@
+ #define __HAL_RCC_ETH1MAC_CLK_ENABLE() __HAL_RCC_ETH1_CLK_ENABLE()
+ 
+ /* PLL register offsets */
+-#define RCC_PLLCKSELR          RCC_REG(0x14)
+-#define RCC_PLL1DIVR           RCC_REG(0x1C)
+-#define RCC_PLL1FRACR          RCC_REG(0x20)
+-#define RCC_PLL3DIVR           RCC_REG(0x2C)
+-#define RCC_PLL3FRACR          RCC_REG(0x30)
++#define RCC_PLLCKSELR          RCC_REG(0x28)
++#define RCC_PLLCFGR            RCC_REG(0x2C)
++#define RCC_PLL1DIVR           RCC_REG(0x30)
++#define RCC_PLL1FRACR          RCC_REG(0x34)
++#define RCC_PLL3DIVR           RCC_REG(0x40)
++#define RCC_PLL3FRACR          RCC_REG(0x44)
+ 
+-#define RCC_PLL3DIVR_P3_SHIFT  24
+-#define RCC_PLL3DIVR_N3_SHIFT  8
+-#define RCC_PLL3DIVR_M3_SHIFT  0
++#define RCC_PLL3DIVR_P3_SHIFT  9
++#define RCC_PLL3DIVR_N3_SHIFT  0
+ #define RCC_PLLCKSELR_DIVM1    (0x3F << 0)
+ #define RCC_PLLCKSELR_DIVM3    (0x1F << 16)
+ #define RCC_PLLCKSELR_PLLSRC   (0x3 << 28)
+ #define RCC_PLLCKSELR_PLLSRC_HSE (0x1 << 28)
+ 
+-#define RCC_D1CFGR             RCC_REG(0x08)
+-#define RCC_D2CFGR             RCC_REG(0x0C)
++#define RCC_CFGR               RCC_REG(0x10)
++#define RCC_D1CFGR             RCC_REG(0x18)
++#define RCC_D2CFGR             RCC_REG(0x1C)
+ 
+ #define RCC_CR                 RCC_REG(0x00)
+diff --git a/startup/system_stm32h7xx.c b/startup/system_stm32h7xx.c
+--- a/startup/system_stm32h7xx.c
++++ b/startup/system_stm32h7xx.c
+@@ -8,6 +8,7 @@ uint32_t SystemCoreClock = 200000000;
+ 
+ static void SystemClock_Config(void)
+ {
++    uint32_t d1tmp;
+     uint32_t tmp;
+ 
+     /* Enable HSE */
+@@ -15,33 +16,45 @@ static void SystemClock_Config(void)
+     while (!(RCC_CR & RCC_CR_HSERDY));
+ 
+     /* Set VOS1 (high performance) for 200 MHz */
+-    PWR_CR1 = (PWR_CR1 & ~PWR_CR1_VOS_MASK) | PWR_CR1_VOS1;
+-    while (!(PWR_CSR1 & PWR_CSR1_ACTVOSRDY));
++    PWR_D3CR = (PWR_D3CR & ~PWR_D3CR_VOS_MASK) | PWR_D3CR_VOS1;
++    while (!(PWR_D3CR & PWR_D3CR_VOSRDY));
+ 
+     /* Flash: 4 wait states + prefetch + ART for 200 MHz */
+     FLASH_ACR = (4 << 0) | FLASH_ACR_PRFTEN | FLASH_ACR_ARTEN;
+ 
+     /* AHB = /1 (200 MHz), APB1/2/3 = /2 (100 MHz) */
++    d1tmp = RCC_D1CFGR;
++    d1tmp &= ~(0xFUL | RCC_D1CFGR_D1CPRE | RCC_D1CFGR_APB3DIV);
++    d1tmp |= (0x4UL << 4);
++    RCC_D1CFGR = d1tmp;
++
+     tmp = RCC_D2CFGR;
+-    tmp &= ~(RCC_D2CFGR_APB1DIV | RCC_D2CFGR_APB2DIV | RCC_D2CFGR_APB3DIV);
+-    tmp |= (0x8 << 8) | (0x8 << 12) | (0x8 << 16); /* /2 each */
++    tmp &= ~(RCC_D2CFGR_APB1DIV | RCC_D2CFGR_APB2DIV);
++    tmp |= (0x4UL << 4) | (0x4UL << 8);
+     RCC_D2CFGR = tmp;
+ 
+     /* PLL1: HSE(12MHz) / M=3 * N=100 / P=2 = 200 MHz, VCO = 400 MHz */
+-    RCC_PLLCKSELR = (3 << 0) | RCC_PLLCKSELR_PLLSRC_HSE; /* M=3, src=HSE */
++    RCC_PLLCKSELR = (RCC_PLLCKSELR & ~(RCC_PLLCKSELR_DIVM1 |
++                       RCC_PLLCKSELR_PLLSRC)) |
++                      3UL | RCC_PLLCKSELR_PLLSRC_HSE;
++    RCC_PLLCFGR = (RCC_PLLCFGR & ~((3UL << 2) | (1UL << 1))) |
++                   (2UL << 2) | (1UL << 16);
+     RCC_PLL1FRACR = 0;
+-    RCC_PLL1DIVR = (2 << 0) |      /* Q = 2 (default) */
+-                   (100 << 8) |    /* N = 100 */
+-                   (2 << 16) |     /* R = 2 (default) */
+-                   ((2-1) << 24);  /* P = 2 (stored as P-1 = 1) */
++    RCC_PLL1DIVR = ((100UL - 1UL) << 0) |
++                   ((2UL - 1UL) << 9) |
++                   ((2UL - 1UL) << 16) |
++                   ((2UL - 1UL) << 24);
+ 
+     /* Enable PLL1 */
+     RCC_CR |= RCC_CR_PLL1ON;
+     while (!(RCC_CR & RCC_CR_PLL1RDY));
+ 
+     /* Switch SYSCLK to PLL1 */
+-    RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_SW) | RCC_CFGR_SW_PLL1;
+-    while ((RCC->CFGR & RCC_CFGR_SW) != RCC_CFGR_SW_PLL1);
++    RCC_CFGR = (RCC_CFGR & ~RCC_CFGR_SW) | RCC_CFGR_SW_PLL1;
++    while ((RCC_CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL1);
+@@ -70,22 +83,21 @@ uint32_t HAL_RCC_GetSysClockFreq(void)
+ {
+     uint32_t pll_input, pllm, pllp, pllsource;
+     uint32_t sysclockfreq = 0;
+ 
+-    switch (RCC->CFGR & RCC_CFGR_SW) {
+-        case RCC_CFGR_SW_HSI:
++    switch (RCC_CFGR & RCC_CFGR_SWS) {
++        case 0:
+             sysclockfreq = 64000000;
+             break;
+-        case RCC_CFGR_SW_HSE:
++        case (2UL << 3):
+             sysclockfreq = HSE_VALUE;
+             break;
+-        case RCC_CFGR_SW_PLL1:
+-            pllsource = (RCC->PLLCKSELR & RCC_PLLCKSELR_PLLSRC) >> 28;
++        case RCC_CFGR_SWS_PLL1:
++            pllsource = (RCC_PLLCKSELR & RCC_PLLCKSELR_PLLSRC) >> 28;
+             pllsource = (pllsource == 1) ? 1 : 0;
+             pll_input = pllsource ? HSE_VALUE : 64000000;
+-            pllm = RCC->PLLCKSELR & RCC_PLLCKSELR_DIVM1;
++            pllm = RCC_PLLCKSELR & RCC_PLLCKSELR_DIVM1;
+             if (pllm == 0) pllm = 1;
+-            pllp = ((RCC->PLL1DIVR & RCC_PLL1DIVR_P1) >> 24) + 1;
++            pllp = ((RCC_PLL1DIVR & RCC_PLL1DIVR_P1) >> 9) + 1;
+             sysclockfreq = (pll_input / pllm) *
+-                           ((RCC->PLL1DIVR & RCC_PLL1DIVR_N1) >> 8) / pllp;
++                           (((RCC_PLL1DIVR & RCC_PLL1DIVR_N1) >> 0) + 1) / pllp;
+             break;
+         default:
+             sysclockfreq = 64000000;
+diff --git a/src/drivers/lan8720.c b/src/drivers/lan8720.c
+--- a/src/drivers/lan8720.c
++++ b/src/drivers/lan8720.c
+@@ -105,10 +105,10 @@ static void lan8720_mco2_init(void)
+     RCC_PLLCKSELR = tmp;
+ 
+     RCC_PLL3FRACR = 0;
+-    RCC_PLL3DIVR = (7 << 24) |      /* PLL3P = 7 → P = 7+1 = 8 */
+-                   (99 << 8) |      /* PLL3N = 99 → N = 99+1 = 100 */
+-                   (1 << 16) |      /* PLL3Q = 1 → Q = 2 */
+-                   (1 << 0);        /* PLL3R = 1 → R = 2 */
++    RCC_PLL3DIVR = (99UL << 0) |    /* PLL3N = 99 -> N = 100 */
++                   (7UL << 9) |     /* PLL3P = 7 -> P = 8 */
++                   (1UL << 16) |    /* PLL3Q = 1 -> Q = 2 */
++                   (1UL << 24);     /* PLL3R = 1 -> R = 2 */

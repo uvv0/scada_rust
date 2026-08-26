@@ -1,0 +1,11 @@
+device STM32H750VB
+si SWD
+speed 1000
+connect
+h
+mem16 0x240083FC, 16
+mem32 0x24011424, 9
+mem32 0x240113A0, 2
+mem32 0x52005000, 8
+g
+q

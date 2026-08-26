@@ -1,0 +1,12 @@
+device STM32H750XB
+si SWD
+speed 4000
+connect
+halt
+regs
+mem32 0x240785E0 32
+mem32 0x2407F000 40
+mem32 0xE000ED24 1
+mem32 0xE000ED28 6
+go
+exit

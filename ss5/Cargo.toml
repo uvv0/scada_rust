@@ -1,0 +1,24 @@
+[package]
+name = "ss5"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0"
+eframe = "0.29"
+egui = "0.29"
+egui_plot = "0.29"
+chrono = "0.4"
+tokio = { version = "1.49", features = ["rt-multi-thread", "time"] }
+tokio-postgres = "0.7"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+serde_json = "1.0"
+bytes = "1.10"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

@@ -1,0 +1,9 @@
+QT -= gui
+CONFIG += console
+TEMPLATE = app
+TARGET = ports_test
+DEFINES += _TTY_WIN_
+LIBS += setupapi.lib advapi32.lib
+SOURCES += ports_test.cpp D:/picoC/qt/1/qextserialenumerator.cpp
+HEADERS += D:/picoC/qt/1/qextserialenumerator.h
+INCLUDEPATH += D:/picoC/qt/1

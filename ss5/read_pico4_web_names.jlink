@@ -1,0 +1,9 @@
+device STM32H750VB
+si SWD
+speed 1000
+connect
+mem8 0x90200028 40
+mem8 0x90201028 40
+mem8 0x90203028 40
+mem8 0x90206028 40
+q

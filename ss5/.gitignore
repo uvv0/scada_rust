@@ -1,0 +1,25 @@
+/target/
+/target_rus_check/
+
+.idea/
+*.log
+*.pdb
+*.exe
+*.dll
+*.lib
+*.exp
+
+*.db
+*.db-shm
+*.db-wal
+*.dump
+
+**/Debug/
+**/Release/
+**/BrowseInfo/
+**/Backup of *
+**/*.dep
+**/*.pbi
+**/*.pbw
+**/*.pbd
+**/*.browse
